@@ -1,0 +1,51 @@
+---
+title: "Basic Inferential Data Analysis"
+author: "Tony Smith"
+date: "March 3, 2021"
+output:
+  pdf_document: default
+  word_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+```
+
+## Overview
+In this analysis, I will be looking at the ToothGrowth data from R datasets. I will perform some simple exploratory analysis and then compare the data by supp and dose.
+
+## Exploratory Data Analysis
+```{r}
+data(ToothGrowth)
+head(ToothGrowth)
+```
+
+Just doing a quick analysis to see the data grouped by supplement and dose:
+
+```{r}
+ToothGrowth %>% group_by(supp, dose) %>% summarise_all(mean)
+```
+
+I see that for both supplements the tooth growth goes up as the dose goes up. It also looks like the OJ supplement is better on average across two of the doses but not the third.
+
+## Hypothesis Testing
+My first null hypothesis for the supplements is that there is no difference in means. My alternative hypothesis is that they are not equal. I assume that the variances are equal and the population from which they are drawn is normally distributed. I will use a t-Test to find the p value and determine if I can reject the null hypothesis.
+
+```{r}
+t.test(ToothGrowth$len[1:30], ToothGrowth$len[31:60], var.equal=TRUE)
+```
+
+We can see that the p value is .06 which is greater than .05, so we fail to reject the null hypothesis. We can also see that 0 is in the confidence interval.
+
+My second null hypothesis for the doses is that there is no difference in the means between the dose of 1.0 and the dose of 2.0. My alterative hypothesis is that the 2.0 dose is greater than the 1.0 dose in terms of effect on growth. I make the same assumptions as I did above and perform another t-Test.
+
+```{r}
+smalldose <- ToothGrowth[ToothGrowth$dose == 1.0,]
+largedose <- ToothGrowth[ToothGrowth$dose == 2.0,]
+t.test(smalldose$len, largedose$len, var.equal=TRUE, alternative="less")
+```
+
+This time the p-value comes out to be very small <<.05, so this tells me that the null hypothesis must be rejected. 

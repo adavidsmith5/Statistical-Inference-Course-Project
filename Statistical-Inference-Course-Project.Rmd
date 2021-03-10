@@ -1,0 +1,67 @@
+---
+title: "Statistical Inference Simulation Exercise"
+author: "Tony Smith"
+date: "March 3, 2021"
+output:
+  pdf_document: default
+  word_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+```
+
+## Overview
+In this exploration I will be simulating an exponential distribution using R. I will then look at the distributions of means and variances to see that the distribution follows the Central Limit Theorem with enough samples.
+
+## Simulation
+
+First I need to simulate the data. I create a vector and then dataframe containing the means of an exponential distribution with lambda = 0.2. I run the simulation 1000 times and the sample size is 40.
+```{r echo=FALSE}
+mns = NULL
+for (i in 1 : 1000) mns = c(mns, mean(rexp(40,0.2)))
+data <- data.frame(mns)
+```
+
+## Sample Mean Versus Theoretical Mean
+
+Next I will graph the histogram of the means along with the actual mean and the simulated mean.
+
+```{r echo=FALSE, fig.width=9, fig.height=5, fig.cap="Fig 1. Histogram for the means of 1000 simulations of 40 exponential distributions."}
+meansimulation <- mean(mns)
+hist(mns, main="Distribution of Means of Exponential Distributions", xlab="Mean of 40 Samples of Exponential Distributions")
+abline(v=c(1/0.2,mean(mns)), col=c("blue", "red"), lty=c(1,2), lwd=c(3, 3))
+```
+
+The red and blue lines are the simulation and theoretical means respectively. As you can see on the graph, they are very close. As mentioned, the theoretical mean is 5, and the simulation mean is `r meansimulation`.
+
+## Sample Variance versus Theoretical Variance
+
+Next, I want to see the distribution of the variance to see how normal it looks. Once again I will be running 1000 simulations with sample size of 40.
+
+```{r echo=FALSE, fig.width=9, fig.height=5, fig.cap="Fig 2. Histogram for the variances of 1000 simulations of 40 exponential distributions."}
+vars = NULL
+for (i in 1 : 1000) vars = c(vars, var(rexp(40,0.2)))
+
+varsimulation <- mean(vars)
+
+hist(vars, main="Distribution of Variances of Exponential Distributions", xlab="Variance of 40 Samples of Exponential Distributions")
+abline(v=c(1/0.04,mean(vars)), col=c("blue", "red"), lty=c(1,2), lwd=c(3, 3))
+```
+
+Once again, you can see that the simulated variance(red line) and the theoretical variance(blue line) are very close together. The simulated is equal to `r varsimulation` and the theoretical variance is equal to the square of the standard deviation. The standard deviation is the same as the mean (1 / lambda = 5), so the theoretical variance is 25.
+
+## Distribution
+
+Finally, I just want to look at the distribution of the means after subtracting the population mean and dividing by the standard error. This should give a graph that is approximately normal if indeed that is the case.
+
+```{r echo=FALSE, fig.width=9, fig.height=5, fig.cap="Fig 3. Density curves of the distribution of the means of the exponential distribution."}
+g <- ggplot(data, aes(x=(mns-5)/(5/sqrt(40)))) + geom_histogram(aes(y=..density..), binwidth=.25) + stat_function(fun = function(x) dnorm(x, mean = 0, sd = 1), color = "red", linetype = "dotted", size = 1)+ theme (axis.title.x = element_blank ())
+g
+
+```
+
+As you can see from the graph, the normal curve (red curve) matches the data pretty well, showing that the distribution is approximately normal even with just sample sizes of 40.
